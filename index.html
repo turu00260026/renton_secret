@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>れんとんの秘密〜三人の霊が語る波乱万丈〜</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0612;
+      --surface: #150f28;
+      --surface2: #1e1638;
+      --yuki: #67e8f9;
+      --rika: #f9a8d4;
+      --neru: #fde68a;
+      --narrator: #c4b5fd;
+      --text: #f0eeff;
+      --muted: #8b85a8;
+      --gold: #fbbf24;
+    }
+    html, body {
+      background: var(--bg);
+      min-height: 100vh;
+      font-family: 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Noto Sans JP', sans-serif;
+      color: var(--text);
+      overflow-x: hidden;
+    }
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse at 10% 20%, rgba(103,232,249,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 90% 80%, rgba(249,168,212,0.08) 0%, transparent 50%);
+      pointer-events: none; z-index: 0;
+    }
+    #app { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; }
+
+    /* タイトル */
+    #s-title {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 48px 24px; text-align: center;
+    }
+    .title-eyebrow {
+      font-size: 11px; letter-spacing: 3px; color: var(--muted);
+      font-weight: bold; margin-bottom: 20px; text-transform: uppercase;
+    }
+    .title-ghost { font-size: 64px; margin-bottom: 24px; animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    .title-h1 {
+      font-size: clamp(24px, 7vw, 40px); font-weight: 900; line-height: 1.3; margin-bottom: 12px;
+      color: var(--text);
+    }
+    .title-h1 span { color: var(--rika); }
+    .title-sub { font-size: 14px; color: var(--muted); margin-bottom: 16px; line-height: 1.8; }
+    .title-chars {
+      display: flex; gap: 16px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap;
+    }
+    .char-badge {
+      font-size: 13px; font-weight: bold; padding: 6px 14px; border-radius: 99px;
+      border: 1px solid currentColor;
+    }
+    .char-badge.yuki { color: var(--yuki); border-color: rgba(103,232,249,0.4); background: rgba(103,232,249,0.07); }
+    .char-badge.rika { color: var(--rika); border-color: rgba(249,168,212,0.4); background: rgba(249,168,212,0.07); }
+    .char-badge.neru { color: var(--neru); border-color: rgba(253,230,138,0.4); background: rgba(253,230,138,0.07); }
+    .btn-start {
+      padding: 18px 52px;
+      background: linear-gradient(135deg, rgba(103,232,249,0.2), rgba(249,168,212,0.2));
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--text); font-size: 17px; font-weight: bold;
+      border-radius: 99px; cursor: pointer;
+      transition: transform 0.1s, background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-start:active { transform: scale(0.96); }
+    .btn-start:hover { background: linear-gradient(135deg, rgba(103,232,249,0.3), rgba(249,168,212,0.3)); }
+
+    /* ノベル */
+    #s-novel { display: none; min-height: 100vh; }
+    .novel-header {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(10,6,18,0.92); backdrop-filter: blur(10px);
+      padding: 12px 20px; display: flex; align-items: center; gap: 12px;
+    }
+    .chapter-bar { flex: 1; height: 2px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+    .chapter-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--yuki), var(--rika), var(--neru));
+      border-radius: 2px; transition: width 0.6s ease;
+    }
+    .chapter-label { font-size: 11px; color: var(--muted); white-space: nowrap; font-weight: bold; }
+
+    .scene-wrap {
+      padding: 40px 24px 32px;
+      min-height: calc(100vh - 56px);
+      display: flex; flex-direction: column;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
+    .chapter-tag {
+      font-size: 10px; font-weight: bold; letter-spacing: 2px;
+      color: var(--muted); margin-bottom: 28px;
+    }
+
+    /* キャラクターセリフ */
+    .speech-block {
+      flex: 1; display: flex; flex-direction: column; justify-content: center;
+    }
+    .speaker-name {
+      font-size: 13px; font-weight: bold; letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+    .speaker-name.yuki { color: var(--yuki); }
+    .speaker-name.rika { color: var(--rika); }
+    .speaker-name.neru { color: var(--neru); }
+    .speaker-name.narrator { color: var(--narrator); font-style: italic; }
+    .speaker-name.all { color: var(--gold); }
+
+    .speech-box {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 24px 20px;
+      font-size: 17px; line-height: 2.1;
+      border-left: 3px solid transparent;
+      position: relative;
+    }
+    .speech-box.yuki { border-color: var(--yuki); }
+    .speech-box.rika { border-color: var(--rika); }
+    .speech-box.neru { border-color: var(--neru); }
+    .speech-box.narrator {
+      border-color: var(--narrator);
+      background: transparent;
+      font-style: italic;
+      color: var(--narrator);
+      font-size: 15px;
+    }
+    .speech-box.all { border-color: var(--gold); }
+
+    .em  { color: var(--gold); font-weight: bold; font-style: normal; }
+    .yc  { color: var(--yuki); font-weight: bold; font-style: normal; }
+    .rc  { color: var(--rika); font-weight: bold; font-style: normal; }
+    .nc  { color: var(--neru); font-weight: bold; font-style: normal; }
+    .lg  { font-size: 22px; font-weight: 900; line-height: 1.5; font-style: normal; }
+
+    .typewriter-cursor::after {
+      content: '▊'; animation: blink 0.7s infinite;
+      color: var(--muted); margin-left: 2px;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    .tap-hint {
+      text-align: center; font-size: 12px; color: var(--muted);
+      padding-top: 28px; animation: fadepulse 1.8s infinite;
+    }
+    @keyframes fadepulse { 0%,100%{opacity:0.2} 50%{opacity:0.8} }
+
+    /* エンディング */
+    #s-ending { display: none; min-height: 100vh; padding: 48px 24px; text-align: center; }
+    .ending-ghost { font-size: 64px; animation: float 2s ease-in-out infinite; margin-bottom: 20px; }
+    .ending-h2 {
+      font-size: clamp(22px, 6vw, 32px); font-weight: 900;
+      line-height: 1.3; margin-bottom: 16px; color: var(--text);
+    }
+    .ending-sub {
+      font-size: 15px; color: var(--muted); line-height: 1.9; margin-bottom: 36px;
+    }
+    .ending-sub strong { color: var(--text); }
+    .ending-chars {
+      display: flex; gap: 8px; justify-content: center; margin-bottom: 36px; flex-wrap: wrap;
+    }
+    .btn-raml {
+      display: block; width: 100%; padding: 20px 24px;
+      background: linear-gradient(135deg, rgba(103,232,249,0.2), rgba(249,168,212,0.2));
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--text); font-size: 17px; font-weight: 900;
+      border-radius: 14px; cursor: pointer;
+      transition: transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+      text-decoration: none; text-align: center;
+    }
+    .btn-raml:active { transform: scale(0.97); }
+    .ending-note { font-size: 12px; color: var(--muted); margin-top: 20px; line-height: 1.8; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- タイトル -->
+  <div id="s-title">
+    <div class="title-eyebrow">Hidden Story</div>
+    <div class="title-ghost">👻</div>
+    <h1 class="title-h1">れんとんの<span>秘密</span></h1>
+    <p class="title-sub">〜三人の霊が語る波乱万丈〜</p>
+    <div class="title-chars">
+      <span class="char-badge yuki">ゆきちゃん</span>
+      <span class="char-badge rika">りかちゃん</span>
+      <span class="char-badge neru">ねるちゃん</span>
+    </div>
+    <button class="btn-start" onclick="startNovel()">物語をはじめる →</button>
+  </div>
+
+  <!-- ノベル -->
+  <div id="s-novel">
+    <div class="novel-header">
+      <div class="chapter-bar"><div class="chapter-fill" id="progress-bar" style="width:0%"></div></div>
+      <div class="chapter-label" id="chapter-label">オープニング</div>
+    </div>
+    <div id="scene-container"></div>
+  </div>
+
+  <!-- エンディング -->
+  <div id="s-ending">
+    <div class="ending-ghost">👻</div>
+    <h2 class="ending-h2">れんとんのこと、<br>少し好きになった？</h2>
+    <p class="ending-sub">
+      波乱万丈な人生を乗り越えて、<br>
+      今も楽しみながら走り続けている人。<br>
+      <strong>それがれんとんです。</strong>
+    </p>
+    <div class="ending-chars">
+      <span class="char-badge yuki">ゆきちゃん</span>
+      <span class="char-badge rika">りかちゃん</span>
+      <span class="char-badge neru">ねるちゃん</span>
+    </div>
+    <a href="https://darling-alfajores-d7d5bb.netlify.app/" class="btn-raml" target="_blank">
+      👉 RAMLについてもっと知る
+    </a>
+    <p class="ending-note">
+      このコンテンツはRAMLメンバーによるファンコンテンツです
+    </p>
+  </div>
+
+</div>
+<script>
+
+const SCENES = [
+  // ===== オープニング =====
+  {
+    chapter: 'オープニング', progress: 3,
+    speaker: 'yuki', text: '……また来ちゃった'
+  },
+  {
+    chapter: 'オープニング', progress: 5,
+    speaker: 'rika', text: 'だって気になるんだもん！'
+  },
+  {
+    chapter: 'オープニング', progress: 7,
+    speaker: 'neru', text: 'あのひとのこと、ちゃんと知ってほしいんだよね'
+  },
+  {
+    chapter: 'オープニング', progress: 10,
+    speaker: 'narrator',
+    text: '占い師は言った。"あなたには3人の霊が憑いています"と。\n\nその霊たちが今夜、語りだす——'
+  },
+
+  // ===== CHAPTER 1：現役理学療法士 =====
+  {
+    chapter: 'CHAPTER 1', progress: 15,
+    speaker: 'yuki',
+    text: 'れんとんは、国家資格持ちの<yc>現役理学療法士</yc>なんだよ'
+  },
+  {
+    chapter: 'CHAPTER 1', progress: 18,
+    speaker: 'rika',
+    text: 'AI・動画の人ってイメージ持ってる人も多いけど、ちゃんと体の専門家でもあるんだよ！'
+  },
+  {
+    chapter: 'CHAPTER 1', progress: 21,
+    speaker: 'neru',
+    text: '<lg>二刀流！！かっこいい！！</lg>'
+  },
+
+  // ===== CHAPTER 2：最初の結婚と崩壊 =====
+  {
+    chapter: 'CHAPTER 2', progress: 26,
+    speaker: 'yuki',
+    text: '最初の結婚で、子供が2人生まれた'
+  },
+  {
+    chapter: 'CHAPTER 2', progress: 29,
+    speaker: 'rika',
+    text: '……でも、うまくいかなかった'
+  },
+  {
+    chapter: 'CHAPTER 2', progress: 32,
+    speaker: 'neru',
+    text: '相手の浮気で離婚。\n2人の子供を引き取って、<em>シングルファーザー</em>になった'
+  },
+  {
+    chapter: 'CHAPTER 2', progress: 35,
+    speaker: 'yuki',
+    text: '子供2人抱えて、仕事して。\n\nそれだけで充分すぎるくらい大変なのに'
+  },
+
+  // ===== CHAPTER 3：詐欺被害 =====
+  {
+    chapter: 'CHAPTER 3', progress: 40,
+    speaker: 'neru',
+    text: '<lg>そこに追い打ちをかけるように！\n詐欺にあった！！</lg>'
+  },
+  {
+    chapter: 'CHAPTER 3', progress: 43,
+    speaker: 'rika',
+    text: '投資詐欺……かなりやられた'
+  },
+  {
+    chapter: 'CHAPTER 3', progress: 46,
+    speaker: 'yuki',
+    text: '普通だったら折れる。\n\nでもれんとんは折れなかった'
+  },
+  {
+    chapter: 'CHAPTER 3', progress: 49,
+    speaker: 'neru',
+    text: '<em>そこがすごいところ！！</em>'
+  },
+
+  // ===== CHAPTER 4：再婚と廃業が同時に来た =====
+  {
+    chapter: 'CHAPTER 4', progress: 54,
+    speaker: 'yuki',
+    text: '新しいパートナーと出会って、ステップファミリーになった'
+  },
+  {
+    chapter: 'CHAPTER 4', progress: 57,
+    speaker: 'rika',
+    text: 'ふたりの間にも赤ちゃんができて——\n\n<rc>妊娠中！！</rc>ってタイミングで'
+  },
+  {
+    chapter: 'CHAPTER 4', progress: 59,
+    speaker: 'neru',
+    text: '勤めてたクリニックの先生が高齢で引退することになって……'
+  },
+  {
+    chapter: 'CHAPTER 4', progress: 61,
+    speaker: 'yuki',
+    text: 'クリニックが廃業。\n\nれんとん、<em>無職</em>になった'
+  },
+  {
+    chapter: 'CHAPTER 4', progress: 63,
+    speaker: 'all',
+    text: '…………'
+  },
+  {
+    chapter: 'CHAPTER 4', progress: 65,
+    speaker: 'rika',
+    text: 'おめでとうとやばいが\n<em>同時に来た</em>'
+  },
+  {
+    chapter: 'CHAPTER 4', progress: 67,
+    speaker: 'neru',
+    text: '子供4人、パートナー妊娠中、無職。\n\nこれが現実'
+  },
+
+  // ===== CHAPTER 5：ブラック企業・病気 =====
+  {
+    chapter: 'CHAPTER 5', progress: 72,
+    speaker: 'yuki',
+    text: '廃業直後に入った会社が、ブラックだった'
+  },
+  {
+    chapter: 'CHAPTER 5', progress: 75,
+    speaker: 'rika',
+    text: 'でも家族がいるから辞められない時期があった……'
+  },
+  {
+    chapter: 'CHAPTER 5', progress: 78,
+    speaker: 'yuki',
+    text: '心と体、両方やられた。\n\n<em>病気になった</em>'
+  },
+
+  // ===== CHAPTER 6：東京の呪い =====
+  {
+    chapter: 'CHAPTER 6', progress: 82,
+    speaker: 'neru',
+    text: 'ここで言わせて！\n\nれんとん、<em>東京に行こうとするといつも何か起きる！！</em>'
+  },
+  {
+    chapter: 'CHAPTER 6', progress: 84,
+    speaker: 'rika',
+    text: '大阪・名古屋はぜんぜん平気なのに！'
+  },
+  {
+    chapter: 'CHAPTER 6', progress: 86,
+    speaker: 'yuki',
+    text: '……交通トラブル・体調不良・予定キャンセル。3回は確認済み'
+  },
+  {
+    chapter: 'CHAPTER 6', progress: 88,
+    speaker: 'neru',
+    text: '私たちが止めてるんじゃないかと思ってる！\n和歌山から遠ざけたくて！'
+  },
+  {
+    chapter: 'CHAPTER 6', progress: 90,
+    speaker: 'rika',
+    text: 'えっそれ霊の仕業なの！？'
+  },
+  {
+    chapter: 'CHAPTER 6', progress: 92,
+    speaker: 'yuki',
+    text: '……仮説です'
+  },
+
+  // ===== CHAPTER 7：今のれんとん =====
+  {
+    chapter: 'CHAPTER 7', progress: 94,
+    speaker: 'rika',
+    text: '今のれんとんは、<rc>訪問理学療法士</rc>として働きながら——'
+  },
+  {
+    chapter: 'CHAPTER 7', progress: 95,
+    speaker: 'neru',
+    text: '<lg>AI画像生成！動画生成！\nクリエイティブ全開！！</lg>'
+  },
+  {
+    chapter: 'CHAPTER 7', progress: 96,
+    speaker: 'yuki',
+    text: 'RAMLというコミュニティを運営して、\n仲間と一緒に学んでる'
+  },
+  {
+    chapter: 'CHAPTER 7', progress: 96,
+    speaker: 'rika',
+    text: 'オフ会が特別でさ！\nAI・動画の話はもちろん——'
+  },
+  {
+    chapter: 'CHAPTER 7', progress: 97,
+    speaker: 'neru',
+    text: '<em>首！肩！腰！</em>\nその場で診てもらえちゃうの！！\n\n理学療法士がいるオフ会、強すぎる'
+  },
+  {
+    chapter: 'CHAPTER 7', progress: 97,
+    speaker: 'yuki',
+    text: '理学療法士とAIクリエイターとコミュニティオーナーが\n\n<em>一人に全部入ってる</em>'
+  },
+  {
+    chapter: 'CHAPTER 7', progress: 98,
+    speaker: 'yuki',
+    text: '……あと一個、大事なことがある'
+  },
+  {
+    chapter: 'CHAPTER 7', progress: 98,
+    speaker: 'rika',
+    text: '言っていい？言っていい？'
+  },
+  {
+    chapter: 'CHAPTER 7', progress: 99,
+    speaker: 'neru',
+    text: 'れんとん、<em>アニメと漫画のオタク</em>なんだよ！！'
+  },
+  {
+    chapter: 'CHAPTER 7', progress: 99,
+    speaker: 'yuki',
+    text: '語り出したら、止まらない'
+  },
+  {
+    chapter: 'CHAPTER 7', progress: 99,
+    speaker: 'rika',
+    text: 'でも話が面白すぎて、\n気づいたら一緒に沼ってる'
+  },
+  {
+    chapter: 'CHAPTER 7', progress: 100,
+    speaker: 'neru',
+    text: '<lg>これが隠された\n最強スキル！！</lg>'
+  },
+
+  // ===== エンディング =====
+  {
+    chapter: 'エンディング', progress: 100,
+    speaker: 'yuki',
+    text: '……長かったね'
+  },
+  {
+    chapter: 'エンディング', progress: 100,
+    speaker: 'rika',
+    text: 'でも伝わったかな？'
+  },
+  {
+    chapter: 'エンディング', progress: 100,
+    speaker: 'neru',
+    text: 'れんとんのこと、\nちょっと好きになってくれた？'
+  },
+  {
+    chapter: 'エンディング', progress: 100,
+    speaker: 'narrator',
+    text: '3人の霊は、また静かに消えていった。\n\n次に現れるのは——\nきっと、れんとんが東京に行こうとした時だ'
+  }
+];
+
+const SPEAKER_LABEL = {
+  yuki: 'ゆきちゃん',
+  rika: 'りかちゃん',
+  neru: 'ねるちゃん',
+  all: '3人',
+  narrator: ''
+};
+
+let currentIndex = 0;
+let isTyping = false;
+let fullText = '';
+let displayedText = '';
+let typeTimer = null;
+
+function startNovel() {
+  document.getElementById('s-title').style.display = 'none';
+  document.getElementById('s-novel').style.display = 'block';
+  currentIndex = 0;
+  renderScene(currentIndex);
+}
+
+function parseText(raw) {
+  return raw
+    .replace(/\n/g, '<br>')
+    .replace(/<em>(.*?)<\/em>/g, '<span class="em">$1</span>')
+    .replace(/<yc>(.*?)<\/yc>/g, '<span class="yc">$1</span>')
+    .replace(/<rc>(.*?)<\/rc>/g, '<span class="rc">$1</span>')
+    .replace(/<nc>(.*?)<\/nc>/g, '<span class="nc">$1</span>')
+    .replace(/<lg>(.*?)<\/lg>/gs, '<span class="lg">$1</span>');
+}
+
+function renderScene(index) {
+  const s = SCENES[index];
+  document.getElementById('progress-bar').style.width = s.progress + '%';
+  document.getElementById('chapter-label').textContent = s.chapter;
+
+  const container = document.getElementById('scene-container');
+  const speakerClass = s.speaker;
+  const speakerName = SPEAKER_LABEL[s.speaker];
+  const rawText = s.text;
+
+  container.innerHTML = `
+    <div class="scene-wrap" onclick="onTap()">
+      <div class="chapter-tag">${s.chapter}</div>
+      <div class="speech-block">
+        ${speakerName ? `<div class="speaker-name ${speakerClass}">${speakerName}</div>` : ''}
+        <div class="speech-box ${speakerClass}" id="speech-text"></div>
+      </div>
+      <div class="tap-hint" id="tap-hint" style="display:none">タップして続ける</div>
+    </div>
+  `;
+
+  startTypewriter(rawText);
+}
+
+function startTypewriter(raw) {
+  isTyping = true;
+  fullText = raw;
+  displayedText = '';
+  const el = document.getElementById('speech-text');
+  if (!el) return;
+
+  el.classList.add('typewriter-cursor');
+  const chars = [...raw];
+  let i = 0;
+
+  function tick() {
+    if (i >= chars.length) {
+      isTyping = false;
+      el.classList.remove('typewriter-cursor');
+      el.innerHTML = parseText(raw);
+      const hint = document.getElementById('tap-hint');
+      if (hint) hint.style.display = 'block';
+      return;
+    }
+    displayedText += chars[i];
+    el.innerHTML = parseText(displayedText) + '<span class="typewriter-cursor"></span>';
+    i++;
+    const ch = chars[i - 1];
+    const delay = (ch === '。' || ch === '…' || ch === '！' || ch === '？') ? 100 : 30;
+    typeTimer = setTimeout(tick, delay);
+  }
+  tick();
+}
+
+function onTap() {
+  if (isTyping) {
+    clearTimeout(typeTimer);
+    isTyping = false;
+    const el = document.getElementById('speech-text');
+    if (el) {
+      el.classList.remove('typewriter-cursor');
+      el.innerHTML = parseText(fullText);
+    }
+    const hint = document.getElementById('tap-hint');
+    if (hint) hint.style.display = 'block';
+    return;
+  }
+
+  currentIndex++;
+  if (currentIndex >= SCENES.length) {
+    showEnding();
+    return;
+  }
+  renderScene(currentIndex);
+}
+
+function showEnding() {
+  document.getElementById('s-novel').style.display = 'none';
+  document.getElementById('s-ending').style.display = 'block';
+}
+
+</script>
+</body>
+</html>
